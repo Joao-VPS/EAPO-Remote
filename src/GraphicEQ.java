@@ -1,4 +1,6 @@
 import javax.swing.*;
+import javax.swing.plaf.basic.BasicSliderUI;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -22,7 +24,8 @@ public class GraphicEQ extends JComponent {
         }
 
         if (firstDigitIndex == -1) {
-            new AlertWindow("Erro", "O valor passado não tem nenhum parâmetro válido", true, false);
+            Main.alert.newAlert("Erro", "O valor passado não tem nenhum parâmetro válido", true, false);
+
             return;
         }
 
@@ -31,11 +34,11 @@ public class GraphicEQ extends JComponent {
 
         for (String element : params) {
             String[] keyValue = element.trim().split(" ");
-            System.out.println(Arrays.toString(keyValue));
+            Main.alert.consoleMessage(Arrays.toString(keyValue), '9');
 
             if (keyValue.length >= 2) {
                 Integer key = Integer.parseInt(keyValue[0]);
-                Double value = Double.parseDouble(keyValue[1]);
+                double value = Double.parseDouble(keyValue[1]);
 
                 if (value > 20.0) value = 20.0;
                 if (value < -20.0) value = -20.0;
@@ -44,7 +47,7 @@ public class GraphicEQ extends JComponent {
             }
         }
 
-        System.out.println("Array completo: " + values);
+        Main.alert.consoleMessage("Array completo: " + values, 'a');
     }
 
     public void showEq() {
@@ -62,10 +65,44 @@ public class GraphicEQ extends JComponent {
             JSlider slider = new JSlider(JSlider.VERTICAL, -200, 200, (int) value);
             slider.addChangeListener(e -> changeValue(element.getKey(), slider.getValue() / 10.0));
 
+            slider.setUI(new BasicSliderUI(slider) {
+                @Override
+                public void paintTrack(Graphics g) {
+                    Graphics2D g2d = (Graphics2D) g;
+                    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                    Rectangle trackBounds = trackRect;
+
+                    int centerX = (trackBounds.width / 2) - 2;
+                    int centerY = (trackBounds.height / 2);
+                    g2d.setColor(Color.GRAY);
+                    g2d.fillRect(centerX, trackBounds.y, 4, trackBounds.height);
+
+                    g2d.setColor(Color.GREEN);
+                    if (slider.getValue() > 0) {
+                        g2d.fillRect(centerX, centerY - slider.getValue(), 4, slider.getValue());
+                    } else {
+                        g2d.fillRect(centerX, centerY, 4, -slider.getValue());
+                    }
+
+                }
+            });
+
+            JLabel freqText = new JLabel(element.getKey().toString());
+            if (element.getKey() >= 1000) {
+                double newValue = (element.getKey() / 1000.0);
+                freqText.setText(Double.toString(newValue).replace(".0", "") + "k");
+            }
+
             JButton resetButton = new JButton("R");
             resetButton.addActionListener(e -> slider.setValue(0));
 
+            slider.setAlignmentX(Component.CENTER_ALIGNMENT);
+            freqText.setAlignmentX(Component.CENTER_ALIGNMENT);
+            resetButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+
             sliderPanel.add(slider);
+            sliderPanel.add(freqText);
             sliderPanel.add(resetButton);
             add(sliderPanel);
         }
@@ -81,8 +118,13 @@ public class GraphicEQ extends JComponent {
         }
 
         values.set(index, new Pair<>(frequency, value));
-        System.out.println("Frequência: " + frequency + " Valor: " + value);
+        Main.alert.consoleMessage("Frequência: " + frequency + " Valor: " + value, '6');
 
-        Main.changeValue(index, (int) (value * 10));
+        Main.fileManager.writer(
+                "GraphicEQ",
+                values.toString()
+                        .replaceAll("[\\[\\]]", "")
+                        .replace(" = ", " ")
+                        .replace(",", ";"));
     }
 }

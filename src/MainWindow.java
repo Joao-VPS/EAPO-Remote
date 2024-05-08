@@ -1,14 +1,16 @@
 import javax.swing.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
 
 public class MainWindow {
-    JFrame window = new JFrame();
-    JPanel app = new JPanel();
+    private final JFrame window = new JFrame();
+    private final JPanel app = new JPanel();
+
+    private final LinkedHashMap<String, JComponent> elements = new LinkedHashMap<>();
 
     public MainWindow(String title) {
         window.setTitle(title);
         window.setSize(1000, 700);
+        window.setLocationRelativeTo(null);
         window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         app.setLayout(new BoxLayout(app, BoxLayout.Y_AXIS));
@@ -17,15 +19,27 @@ public class MainWindow {
         window.setVisible(true);
     }
 
-    public void updateElements(List<JComponent> elements) {
+    public void updateElement(String name, JComponent newComponent) {
         app.removeAll();
-        for (JComponent element : elements) {
-            app.add(element);
+
+        if (elements.containsKey(name)) {
+            elements.replace(name, newComponent);
+        } else {
+            elements.put(name, newComponent);
         }
+
+        elements.forEach((key, value) -> app.add(value));
+
+        app.updateUI();
     }
 
-    public void addElement(JComponent element) {
-        app.add(element);
-        app.updateUI();
+    public void addElement(String name, JComponent element) {
+        if (elements.containsKey(name)) {
+            updateElement(name, element);
+        } else {
+            elements.put(name, element);
+            app.add(element);
+            app.updateUI();
+        }
     }
 }
