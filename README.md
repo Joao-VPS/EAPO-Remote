@@ -1,7 +1,10 @@
-# What is EAPO Remote?
+# What is EAPO Remote? (Server)
 EAPO Remote is software designed to allow remote configuration of the EqualizerAPO application's config.txt file.
 
 This application was developed thinking about a cheap and efficient remote equalization solution for your computer, requiring only a "driver" version that will receive configuration updates and a "controller" version that will send these settings to the driver for updating.
+
+> [!WARNING]
+> Still under development! It WILL NOT work properly!
 
 # Why shoud I use this?
 This app allows you to control your computer's equalization without touching your device directly. It's a good option if you don't want to minimize any application running on your Windows, or in small events where your computer is responsible for the projections and sounds.
